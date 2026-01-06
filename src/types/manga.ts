@@ -39,6 +39,11 @@ export interface ChapterContent {
     title?: string;
     prevChapter?: string;
     nextChapter?: string;
+    // Manga metadata for history tracking
+    mangaSlug?: string;
+    mangaTitle?: string;
+    mangaThumbnail?: string;
+    chapterNumber?: string;
 }
 
 // ============================================

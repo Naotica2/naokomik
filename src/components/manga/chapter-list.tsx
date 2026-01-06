@@ -31,7 +31,7 @@ export function ChapterList({ chapters, className }: ChapterListProps) {
                     transition={{ duration: 0.2, delay: index * 0.02 }}
                 >
                     <Link
-                        href={`/manga/read/${encodeURIComponent(chapter.slug)}`}
+                        href={`/komik/read/${encodeURIComponent(chapter.slug)}`}
                         className={cn(
                             "flex items-center justify-between py-3 px-4",
                             "bg-surface hover:bg-surface-hover rounded-lg",

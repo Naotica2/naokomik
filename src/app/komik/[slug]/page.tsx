@@ -208,7 +208,7 @@ export default function MangaDetailPage() {
                         <div className="flex flex-wrap gap-3 pt-2">
                             {firstChapter && (
                                 <Link
-                                    href={`/manga/read/${encodeURIComponent(firstChapter.slug)}`}
+                                    href={`/komik/read/${encodeURIComponent(firstChapter.slug)}`}
                                     className="btn-primary"
                                 >
                                     <Play className="w-4 h-4" />
@@ -217,7 +217,7 @@ export default function MangaDetailPage() {
                             )}
                             {latestChapter && (
                                 <Link
-                                    href={`/manga/read/${encodeURIComponent(latestChapter.slug)}`}
+                                    href={`/komik/read/${encodeURIComponent(latestChapter.slug)}`}
                                     className="btn-secondary"
                                 >
                                     <BookOpen className="w-4 h-4" />

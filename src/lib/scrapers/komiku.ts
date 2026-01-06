@@ -180,7 +180,7 @@ export async function getMangaDetail(slug: string): Promise<MangaDetail> {
                     number: chapterNumber,
                     slug: chapterSlug,
                     release: chapterRelease,
-                    detailUrl: `/manga/read/${encodeURIComponent(chapterSlug)}`,
+                    detailUrl: `/komik/read/${encodeURIComponent(chapterSlug)}`,
                 });
             }
         }
@@ -247,7 +247,40 @@ export async function getChapterImages(slug: string): Promise<ChapterContent> {
         }
     });
 
+    // Extract manga metadata for history
+    const title = sanitizeText($("title").text()) || sanitizeText($("h1").first().text());
+    const mangaTitle = sanitizeText($("#Judul h1").text()) ||
+        sanitizeText($(".chapter-title").text()) ||
+        title?.replace(/Chapter.*$/i, "").trim() ||
+        "";
+
+    // Try to extract manga slug from breadcrumb or links
+    const mangaLink = $("a[href*='/manga/']").attr("href") || "";
+    const mangaSlugParts = mangaLink.split("/").filter(Boolean);
+    const mangaSlug = mangaSlugParts[mangaSlugParts.length - 1] || slug.split("-chapter")[0] || "";
+
+    // Get thumbnail if available
+    const mangaThumbnail = cleanImageUrl($(".chapter-manga-thumbnail img").attr("src")) ||
+        cleanImageUrl($("meta[property='og:image']").attr("content")) || "";
+
+    // Extract chapter number
+    const chapterNumber = title?.match(/Chapter\s*([\d.]+)/i)?.[1] ||
+        slug.match(/chapter-?([\d.]+)/i)?.[1] ||
+        "";
+
+    // Get navigation chapters
+    const prevChapter = sanitizeText($("a.prev").attr("href")?.split("/")[1] || "");
+    const nextChapter = sanitizeText($("a.next").attr("href")?.split("/")[1] || "");
+
     return {
         images,
+        title,
+        mangaSlug: sanitizeText(mangaSlug),
+        mangaTitle: sanitizeText(mangaTitle),
+        mangaThumbnail: sanitizeUrl(mangaThumbnail) || "",
+        chapterNumber: `Chapter ${chapterNumber}`,
+        prevChapter: prevChapter || undefined,
+        nextChapter: nextChapter || undefined,
     };
 }
+

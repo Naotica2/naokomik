@@ -14,6 +14,7 @@ import {
     Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { addToHistory } from "@/lib/history";
 import type { ChapterContent } from "@/types/manga";
 
 interface MangaReaderProps {
@@ -29,7 +30,7 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-    const { images, title, prevChapter, nextChapter } = chapterData;
+    const { images, title, prevChapter, nextChapter, mangaSlug, mangaTitle, mangaThumbnail, chapterNumber } = chapterData;
 
     // Hide controls after inactivity
     useEffect(() => {
@@ -85,15 +86,28 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
     useEffect(() => {
         const handleKeydown = (e: KeyboardEvent) => {
             if (e.key === "ArrowLeft" && prevChapter) {
-                window.location.href = `/manga/read/${encodeURIComponent(prevChapter)}`;
+                window.location.href = `/komik/read/${encodeURIComponent(prevChapter)}`;
             } else if (e.key === "ArrowRight" && nextChapter) {
-                window.location.href = `/manga/read/${encodeURIComponent(nextChapter)}`;
+                window.location.href = `/komik/read/${encodeURIComponent(nextChapter)}`;
             }
         };
 
         window.addEventListener("keydown", handleKeydown);
         return () => window.removeEventListener("keydown", handleKeydown);
     }, [prevChapter, nextChapter]);
+
+    // Save to reading history when chapter loads
+    useEffect(() => {
+        if (mangaSlug && mangaTitle && chapterSlug && chapterNumber) {
+            addToHistory({
+                slug: mangaSlug,
+                title: mangaTitle,
+                thumbnail: mangaThumbnail || "/placeholder-manga.jpg",
+                chapterSlug: chapterSlug,
+                chapterNumber: chapterNumber,
+            });
+        }
+    }, [mangaSlug, mangaTitle, mangaThumbnail, chapterSlug, chapterNumber]);
 
     const scrollToTop = useCallback(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -232,6 +246,31 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                         />
                     </div>
                 ))}
+
+                {/* End of Chapter Message */}
+                {!nextChapter && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col items-center justify-center py-12 px-4 text-center"
+                    >
+                        <div className="p-4 rounded-xl bg-accent/10 mb-4">
+                            <ChevronRight className="w-8 h-8 text-accent" />
+                        </div>
+                        <h3 className="text-xl font-bold text-text-primary mb-2">
+                            Ini adalah chapter terakhir
+                        </h3>
+                        <p className="text-text-muted text-sm mb-6 max-w-md">
+                            Kamu sudah membaca hingga chapter terbaru. Nantikan update chapter selanjutnya!
+                        </p>
+                        <Link
+                            href={mangaSlug ? `/komik/${encodeURIComponent(mangaSlug)}` : "/"}
+                            className="btn-primary"
+                        >
+                            Kembali ke Detail Komik
+                        </Link>
+                    </motion.div>
+                )}
             </div>
 
             {/* Bottom Navigation */}
@@ -247,7 +286,7 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                             {/* Prev Chapter */}
                             {prevChapter ? (
                                 <Link
-                                    href={`/manga/read/${encodeURIComponent(prevChapter)}`}
+                                    href={`/komik/read/${encodeURIComponent(prevChapter)}`}
                                     className="flex items-center gap-2 text-sm text-text-secondary hover:text-accent transition-colors"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
@@ -270,7 +309,7 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                             {/* Next Chapter */}
                             {nextChapter ? (
                                 <Link
-                                    href={`/manga/read/${encodeURIComponent(nextChapter)}`}
+                                    href={`/komik/read/${encodeURIComponent(nextChapter)}`}
                                     className="flex items-center gap-2 text-sm text-text-secondary hover:text-accent transition-colors"
                                 >
                                     <span className="hidden sm:inline">

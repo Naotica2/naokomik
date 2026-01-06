@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
 const navItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/latest", label: "Latest", icon: Clock },
-    { href: "/manga", label: "Library", icon: Library },
+    { href: "/komik", label: "Library", icon: Library },
     { href: "/search", label: "Search", icon: Search },
 ];
 
@@ -17,7 +17,7 @@ export function MobileNav() {
     const pathname = usePathname();
 
     // Don't show on reader page
-    if (pathname.startsWith("/manga/read")) {
+    if (pathname.startsWith("/komik/read")) {
         return null;
     }
 

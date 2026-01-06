@@ -204,7 +204,7 @@ export async function getMangaDetail(slug: string): Promise<MangaDetail> {
                 number: chapterNumber,
                 slug: chapterSlug,
                 release: chapterRelease,
-                detailUrl: `/manga/read/${encodeURIComponent(chapterSlug)}`,
+                detailUrl: `/komik/read/${encodeURIComponent(chapterSlug)}`,
             });
         }
     });
@@ -249,7 +249,41 @@ export async function getChapterImages(slug: string): Promise<ChapterContent> {
         }
     });
 
+    // Extract manga metadata for history
+    const title = sanitizeText($("title").text()) || sanitizeText($("h1").first().text());
+    const mangaTitle = sanitizeText($(".chapter-heading").text())?.replace(/Chapter.*$/i, "").trim() ||
+        sanitizeText($("h1.entry-title").text())?.replace(/Chapter.*$/i, "").trim() ||
+        title?.replace(/Chapter.*$/i, "").trim() ||
+        "";
+
+    // Try to extract manga slug from links
+    const mangaLink = $("a[href*='/manga/']").attr("href") || "";
+    const mangaSlugParts = mangaLink.split("/").filter(Boolean);
+    const mangaSlug = mangaSlugParts[mangaSlugParts.length - 1] || slug.split("-chapter")[0] || "";
+
+    // Get thumbnail if available
+    const mangaThumbnail = cleanImageUrl($("meta[property='og:image']").attr("content")) || "";
+
+    // Extract chapter number
+    const chapterNumber = title?.match(/Chapter\s*([\d.]+)/i)?.[1] ||
+        slug.match(/chapter-?([\d.]+)/i)?.[1] ||
+        "";
+
+    // Get navigation chapters
+    const prevLink = $(".prev_pic a, .ch-prev-btn").attr("href") || "";
+    const nextLink = $(".next_pic a, .ch-next-btn").attr("href") || "";
+    const prevChapter = prevLink.split("/").filter(Boolean).pop() || "";
+    const nextChapter = nextLink.split("/").filter(Boolean).pop() || "";
+
     return {
         images,
+        title,
+        mangaSlug: sanitizeText(mangaSlug),
+        mangaTitle: sanitizeText(mangaTitle),
+        mangaThumbnail: sanitizeUrl(mangaThumbnail) || "",
+        chapterNumber: `Chapter ${chapterNumber}`,
+        prevChapter: prevChapter || undefined,
+        nextChapter: nextChapter || undefined,
     };
 }
+

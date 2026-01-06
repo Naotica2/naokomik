@@ -6,6 +6,7 @@ import { ArrowRight, Flame, Clock, TrendingUp, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { FeaturedCarousel } from "@/components/manga/featured-carousel";
 import { MangaGrid } from "@/components/manga/manga-grid";
+import { ReadingHistory } from "@/components/history/reading-history";
 import type { Manga } from "@/types/manga";
 
 interface MangaResponse {
@@ -74,6 +75,9 @@ export default function HomePage() {
 
       {/* Main Content */}
       <div className="container-custom py-8 md:py-12 space-y-12">
+        {/* Reading History */}
+        <ReadingHistory />
+
         {/* Error State */}
         {error && (
           <motion.div
@@ -98,9 +102,9 @@ export default function HomePage() {
               <div className="p-2 rounded-lg bg-accent/10">
                 <Flame className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="section-title">Manga Populer</h2>
+              <h2 className="section-title">Komik Populer</h2>
             </div>
-            <Link href="/manga" className="section-link group">
+            <Link href="/komik" className="section-link group">
               <span>Lihat Semua</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
@@ -130,7 +134,7 @@ export default function HomePage() {
               transition={{ delay: 0.1 }}
             >
               <Link
-                href="/manga?sort=popular"
+                href="/komik?sort=popular"
                 className="card group p-6 flex items-center gap-4 hover:border-accent/50"
               >
                 <div className="p-3 rounded-xl bg-violet-500/10 group-hover:bg-violet-500/20 transition-colors">
@@ -141,7 +145,7 @@ export default function HomePage() {
                     Paling Populer
                   </h3>
                   <p className="text-sm text-text-muted">
-                    Baca manga terpopuler
+                    Baca komik terpopuler
                   </p>
                 </div>
               </Link>
@@ -154,7 +158,7 @@ export default function HomePage() {
               transition={{ delay: 0.2 }}
             >
               <Link
-                href="/manga?sort=latest"
+                href="/komik?sort=latest"
                 className="card group p-6 flex items-center gap-4 hover:border-accent/50"
               >
                 <div className="p-3 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
@@ -178,7 +182,7 @@ export default function HomePage() {
               transition={{ delay: 0.3 }}
             >
               <Link
-                href="/manga"
+                href="/komik"
                 className="card group p-6 flex items-center gap-4 hover:border-accent/50"
               >
                 <div className="p-3 rounded-xl bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
@@ -189,7 +193,7 @@ export default function HomePage() {
                     Jelajahi Semua
                   </h3>
                   <p className="text-sm text-text-muted">
-                    Temukan manga favoritmu
+                    Temukan komik favoritmu
                   </p>
                 </div>
               </Link>

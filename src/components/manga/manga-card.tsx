@@ -15,7 +15,7 @@ interface MangaCardProps {
 
 export function MangaCard({ manga, priority = false, className }: MangaCardProps) {
     return (
-        <Link href={`/manga/${encodeURIComponent(manga.slug)}`}>
+        <Link href={`/komik/${encodeURIComponent(manga.slug)}`}>
             <motion.article
                 className={cn("manga-card group", className)}
                 whileHover={{ scale: 1.02 }}

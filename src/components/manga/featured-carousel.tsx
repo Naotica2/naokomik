@@ -127,7 +127,7 @@ export function FeaturedCarousel({
 
                         {/* CTA Button */}
                         <Link
-                            href={`/manga/${encodeURIComponent(current.slug)}`}
+                            href={`/komik/${encodeURIComponent(current.slug)}`}
                             className="btn-primary w-fit mt-4"
                         >
                             <BookOpen className="w-4 h-4" />
