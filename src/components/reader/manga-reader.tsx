@@ -14,6 +14,7 @@ import {
     Loader2,
     Maximize,
     Minimize,
+    Menu,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { addToHistory } from "@/lib/history";
@@ -32,12 +33,33 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showFloatingNav, setShowFloatingNav] = useState(false);
     const [isImmersiveMode, setIsImmersiveMode] = useState(false);
+    const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
     const containerRef = useRef<HTMLDivElement>(null);
     const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
     const floatingNavTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Check if running on iOS (doesn't support Fullscreen API well)
     const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    // Detect device type based on viewport
+    useEffect(() => {
+        const checkDevice = () => {
+            const width = window.innerWidth;
+            if (width < 640) {
+                setDeviceType('mobile');
+            } else if (width < 1024) {
+                setDeviceType('tablet');
+            } else {
+                setDeviceType('desktop');
+            }
+        };
+        checkDevice();
+        window.addEventListener('resize', checkDevice);
+        return () => window.removeEventListener('resize', checkDevice);
+    }, []);
+
+    const isMobile = deviceType === 'mobile';
+    const isTablet = deviceType === 'tablet';
 
     const { images, title, prevChapter, nextChapter, mangaSlug, mangaTitle, mangaThumbnail, chapterNumber } = chapterData;
 
@@ -227,9 +249,9 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
             onMouseMove={handleFullscreenMouseMove}
             onTouchStart={handleFullscreenMouseMove}
         >
-            {/* Top Bar */}
+            {/* Top Bar - Hidden on mobile/tablet in fullscreen for clean reading */}
             <AnimatePresence>
-                {showControls && (
+                {showControls && !((isMobile || isTablet) && (isFullscreen || isImmersiveMode)) && (
                     <motion.header
                         initial={{ opacity: 0, y: -50 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -281,9 +303,9 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                 )}
             </AnimatePresence>
 
-            {/* Image List Panel */}
+            {/* Image List Panel - Hidden on mobile/tablet in fullscreen */}
             <AnimatePresence>
-                {showNav && (
+                {showNav && !((isMobile || isTablet) && (isFullscreen || isImmersiveMode)) && (
                     <motion.div
                         initial={{ opacity: 0, x: 300 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -323,7 +345,7 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
             </AnimatePresence>
 
             {/* Images */}
-            <div className="reader-container py-14">
+            <div className={`reader-container ${(isFullscreen || isImmersiveMode) && (isMobile || isTablet) ? 'py-0' : 'py-14'}`}>
                 {images.map((imageUrl, index) => (
                     <div
                         key={index}
@@ -381,9 +403,9 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                 )}
             </div>
 
-            {/* Bottom Navigation */}
+            {/* Bottom Navigation - Hidden on mobile/tablet in fullscreen for cleaner experience */}
             <AnimatePresence>
-                {showControls && (
+                {showControls && !((isMobile || isTablet) && (isFullscreen || isImmersiveMode)) && (
                     <motion.nav
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -429,72 +451,136 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                 )}
             </AnimatePresence>
 
-            {/* Floating Fullscreen Navigation - Always accessible */}
+            {/* Floating Fullscreen Navigation */}
             <AnimatePresence>
                 {(isFullscreen || isImmersiveMode) && (showFloatingNav || showControls) && (
                     <>
-                        {/* Left side - Prev Chapter */}
-                        {prevChapter && (
+                        {/* Desktop only: Side navigation */}
+                        {!isMobile && !isTablet && (
+                            <>
+                                {/* Left side - Prev Chapter */}
+                                {prevChapter && (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        className="fixed left-4 top-1/2 -translate-y-1/2 z-50"
+                                    >
+                                        <Link
+                                            href={`/komik/read/${encodeURIComponent(prevChapter)}`}
+                                            className="flex flex-col items-center gap-2 p-4 rounded-xl glass border border-border/30 hover:bg-surface/90 transition-all group"
+                                        >
+                                            <ChevronLeft className="w-8 h-8 text-accent group-hover:scale-110 transition-transform" />
+                                            <span className="text-xs font-medium text-text-secondary">Prev</span>
+                                        </Link>
+                                    </motion.div>
+                                )}
+
+                                {/* Right side - Next Chapter */}
+                                {nextChapter && (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                        className="fixed right-4 top-1/2 -translate-y-1/2 z-50"
+                                    >
+                                        <Link
+                                            href={`/komik/read/${encodeURIComponent(nextChapter)}`}
+                                            className="flex flex-col items-center gap-2 p-4 rounded-xl glass border border-border/30 hover:bg-surface/90 transition-all group"
+                                        >
+                                            <ChevronRight className="w-8 h-8 text-accent group-hover:scale-110 transition-transform" />
+                                            <span className="text-xs font-medium text-text-secondary">Next</span>
+                                        </Link>
+                                    </motion.div>
+                                )}
+                            </>
+                        )}
+
+                        {/* Mobile & Tablet: Minimal bottom nav - only shows on tap */}
+                        {(isMobile || isTablet) && (
                             <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                className="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-50"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 20 }}
+                                className="fixed bottom-0 left-0 right-0 z-50 safe-area-pb"
                             >
-                                <Link
-                                    href={`/komik/read/${encodeURIComponent(prevChapter)}`}
-                                    className="flex flex-col items-center gap-1 md:gap-2 p-2 md:p-4 rounded-lg md:rounded-xl glass border border-border/30 hover:bg-surface/90 active:bg-surface/90 transition-all group"
-                                >
-                                    <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 text-accent group-hover:scale-110 transition-transform" />
-                                    <span className="text-[10px] md:text-xs font-medium text-text-secondary hidden sm:block">Prev</span>
-                                </Link>
+                                <div className={`flex items-center justify-between ${isTablet ? 'px-8 py-4' : 'px-4 py-3'} bg-black/80 backdrop-blur-sm`}>
+                                    {/* Prev */}
+                                    {prevChapter ? (
+                                        <Link
+                                            href={`/komik/read/${encodeURIComponent(prevChapter)}`}
+                                            className={`flex items-center gap-1.5 ${isTablet ? 'px-4 py-2.5' : 'px-3 py-2'} rounded-lg bg-white/10 active:bg-white/20`}
+                                        >
+                                            <ChevronLeft className={isTablet ? 'w-5 h-5' : 'w-4 h-4'} />
+                                            <span className={isTablet ? 'text-sm' : 'text-xs'}>Prev</span>
+                                        </Link>
+                                    ) : (
+                                        <div className="w-16" />
+                                    )}
+
+                                    {/* Center: Page + Exit */}
+                                    <div className="flex items-center gap-3">
+                                        <span className={`${isTablet ? 'text-sm' : 'text-xs'} text-white/70`}>
+                                            {currentImage + 1}/{images.length}
+                                        </span>
+                                        <button
+                                            onClick={toggleFullscreen}
+                                            className={`${isTablet ? 'p-2.5' : 'p-2'} rounded-lg bg-white/10 active:bg-white/20`}
+                                        >
+                                            <Minimize className={isTablet ? 'w-5 h-5' : 'w-4 h-4'} />
+                                        </button>
+                                        <button
+                                            onClick={scrollToTop}
+                                            className={`${isTablet ? 'p-2.5' : 'p-2'} rounded-lg bg-accent active:bg-accent-hover`}
+                                        >
+                                            <ArrowUp className={`${isTablet ? 'w-5 h-5' : 'w-4 h-4'} text-white`} />
+                                        </button>
+                                    </div>
+
+                                    {/* Next */}
+                                    {nextChapter ? (
+                                        <Link
+                                            href={`/komik/read/${encodeURIComponent(nextChapter)}`}
+                                            className={`flex items-center gap-1.5 ${isTablet ? 'px-4 py-2.5' : 'px-3 py-2'} rounded-lg bg-accent active:bg-accent-hover`}
+                                        >
+                                            <span className={`${isTablet ? 'text-sm' : 'text-xs'} text-white`}>Next</span>
+                                            <ChevronRight className={`${isTablet ? 'w-5 h-5' : 'w-4 h-4'} text-white`} />
+                                        </Link>
+                                    ) : (
+                                        <div className="w-16" />
+                                    )}
+                                </div>
                             </motion.div>
                         )}
 
-                        {/* Right side - Next Chapter */}
-                        {nextChapter && (
+                        {/* Desktop only: Bottom center controls */}
+                        {!isMobile && !isTablet && (
                             <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                className="fixed right-2 md:right-4 top-1/2 -translate-y-1/2 z-50"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 20 }}
+                                className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3"
                             >
-                                <Link
-                                    href={`/komik/read/${encodeURIComponent(nextChapter)}`}
-                                    className="flex flex-col items-center gap-1 md:gap-2 p-2 md:p-4 rounded-lg md:rounded-xl glass border border-border/30 hover:bg-surface/90 active:bg-surface/90 transition-all group"
+                                <div className="px-4 py-2 rounded-full glass border border-border/30">
+                                    <span className="text-sm font-medium text-text-primary">
+                                        {currentImage + 1} / {images.length}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={toggleFullscreen}
+                                    className="p-3 rounded-full glass border border-border/30 hover:bg-surface/90 transition-all"
+                                    title="Keluar Fullscreen (F)"
                                 >
-                                    <ChevronRight className="w-6 h-6 md:w-8 md:h-8 text-accent group-hover:scale-110 transition-transform" />
-                                    <span className="text-[10px] md:text-xs font-medium text-text-secondary hidden sm:block">Next</span>
-                                </Link>
+                                    <Minimize className="w-5 h-5 text-accent" />
+                                </button>
+                                <button
+                                    onClick={scrollToTop}
+                                    className="p-3 rounded-full bg-accent hover:bg-accent-hover transition-all"
+                                >
+                                    <ArrowUp className="w-5 h-5 text-white" />
+                                </button>
                             </motion.div>
                         )}
-
-                        {/* Bottom center - Exit Fullscreen & Page Info */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            className="fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 md:gap-3"
-                        >
-                            <div className="px-3 md:px-4 py-1.5 md:py-2 rounded-full glass border border-border/30">
-                                <span className="text-xs md:text-sm font-medium text-text-primary">
-                                    {currentImage + 1} / {images.length}
-                                </span>
-                            </div>
-                            <button
-                                onClick={toggleFullscreen}
-                                className="p-2 md:p-3 rounded-full glass border border-border/30 hover:bg-surface/90 active:bg-surface/90 transition-all"
-                                title="Keluar Fullscreen (F)"
-                            >
-                                <Minimize className="w-4 h-4 md:w-5 md:h-5 text-accent" />
-                            </button>
-                            <button
-                                onClick={scrollToTop}
-                                className="p-2 md:p-3 rounded-full bg-accent hover:bg-accent-hover active:bg-accent-hover transition-all"
-                            >
-                                <ArrowUp className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                            </button>
-                        </motion.div>
                     </>
                 )}
             </AnimatePresence>
