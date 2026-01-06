@@ -83,7 +83,7 @@ export default function LibraryPage() {
                                 Library Komik
                             </h1>
                             <p className="text-text-muted mt-1">
-                                Jelajahi koleksi komik, manhwa, dan manhua
+                                Jelajahi koleksi manga, manhwa, dan manhua
                             </p>
                         </div>
                     </motion.div>
