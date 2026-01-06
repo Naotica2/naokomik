@@ -65,7 +65,7 @@ export default function MangaDetailPage() {
             <div className="min-h-screen flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-10 h-10 text-accent animate-spin" />
-                    <p className="text-text-muted">Memuat manga...</p>
+                    <p className="text-text-muted">Memuat komik...</p>
                 </div>
             </div>
         );

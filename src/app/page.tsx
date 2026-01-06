@@ -158,7 +158,7 @@ export default function HomePage() {
               transition={{ delay: 0.2 }}
             >
               <Link
-                href="/komik?sort=latest"
+                href="/latest"
                 className="card group p-6 flex items-center gap-4 hover:border-accent/50"
               >
                 <div className="p-3 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
