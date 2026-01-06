@@ -12,6 +12,8 @@ import {
     Home,
     List,
     Loader2,
+    Maximize,
+    Minimize,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { addToHistory } from "@/lib/history";
@@ -27,8 +29,15 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
     const [showNav, setShowNav] = useState(false);
     const [currentImage, setCurrentImage] = useState(0);
     const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showFloatingNav, setShowFloatingNav] = useState(false);
+    const [isImmersiveMode, setIsImmersiveMode] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const floatingNavTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Check if running on iOS (doesn't support Fullscreen API well)
+    const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
     const { images, title, prevChapter, nextChapter, mangaSlug, mangaTitle, mangaThumbnail, chapterNumber } = chapterData;
 
@@ -89,12 +98,94 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                 window.location.href = `/komik/read/${encodeURIComponent(prevChapter)}`;
             } else if (e.key === "ArrowRight" && nextChapter) {
                 window.location.href = `/komik/read/${encodeURIComponent(nextChapter)}`;
+            } else if (e.key === "f" || e.key === "F") {
+                toggleFullscreen();
+            } else if (e.key === "Escape" && isFullscreen) {
+                exitFullscreen();
             }
         };
 
         window.addEventListener("keydown", handleKeydown);
         return () => window.removeEventListener("keydown", handleKeydown);
-    }, [prevChapter, nextChapter]);
+    }, [prevChapter, nextChapter, isFullscreen]);
+
+    // Fullscreen change detection
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+        return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    }, []);
+
+    // Toggle fullscreen mode
+    const toggleFullscreen = useCallback(async () => {
+        try {
+            // For iOS or when Fullscreen API is not available, use immersive mode
+            if (isIOS || !document.documentElement.requestFullscreen) {
+                setIsImmersiveMode(prev => !prev);
+                setIsFullscreen(prev => !prev);
+                return;
+            }
+
+            if (!document.fullscreenElement) {
+                await document.documentElement.requestFullscreen();
+                setIsFullscreen(true);
+            } else {
+                await document.exitFullscreen();
+                setIsFullscreen(false);
+            }
+        } catch (err) {
+            // Fallback to immersive mode if fullscreen fails
+            console.error("Fullscreen error, using immersive mode:", err);
+            setIsImmersiveMode(prev => !prev);
+            setIsFullscreen(prev => !prev);
+        }
+    }, [isIOS]);
+
+    // Exit fullscreen
+    const exitFullscreen = useCallback(async () => {
+        try {
+            if (isImmersiveMode) {
+                setIsImmersiveMode(false);
+                setIsFullscreen(false);
+                return;
+            }
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+                setIsFullscreen(false);
+            }
+        } catch (err) {
+            console.error("Exit fullscreen error:", err);
+            setIsImmersiveMode(false);
+            setIsFullscreen(false);
+        }
+    }, [isImmersiveMode]);
+
+    // Show floating nav on mouse move in fullscreen
+    const handleFullscreenMouseMove = useCallback(() => {
+        if (!isFullscreen) return;
+
+        setShowFloatingNav(true);
+
+        if (floatingNavTimeoutRef.current) {
+            clearTimeout(floatingNavTimeoutRef.current);
+        }
+
+        floatingNavTimeoutRef.current = setTimeout(() => {
+            setShowFloatingNav(false);
+        }, 2500);
+    }, [isFullscreen]);
+
+    // Cleanup floating nav timeout
+    useEffect(() => {
+        return () => {
+            if (floatingNavTimeoutRef.current) {
+                clearTimeout(floatingNavTimeoutRef.current);
+            }
+        };
+    }, []);
 
     // Save to reading history when chapter loads
     useEffect(() => {
@@ -128,7 +219,13 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
     return (
         <div
             ref={containerRef}
-            className="relative min-h-screen bg-black select-none"
+            className={cn(
+                "relative min-h-screen bg-black select-none",
+                (isFullscreen || isImmersiveMode) && "fullscreen-reader",
+                isImmersiveMode && "immersive-mode"
+            )}
+            onMouseMove={handleFullscreenMouseMove}
+            onTouchStart={handleFullscreenMouseMove}
         >
             {/* Top Bar */}
             <AnimatePresence>
@@ -157,6 +254,17 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                                 <span className="text-xs text-text-muted">
                                     {currentImage + 1} / {images.length}
                                 </span>
+                                <button
+                                    onClick={toggleFullscreen}
+                                    className="p-2 hover:bg-surface rounded-lg transition-colors"
+                                    title={isFullscreen ? "Keluar Fullscreen (F)" : "Fullscreen (F)"}
+                                >
+                                    {isFullscreen ? (
+                                        <Minimize className="w-5 h-5" />
+                                    ) : (
+                                        <Maximize className="w-5 h-5" />
+                                    )}
+                                </button>
                                 <button
                                     onClick={() => setShowNav(!showNav)}
                                     className="p-2 hover:bg-surface rounded-lg transition-colors"
@@ -318,6 +426,76 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                             )}
                         </div>
                     </motion.nav>
+                )}
+            </AnimatePresence>
+
+            {/* Floating Fullscreen Navigation - Always accessible */}
+            <AnimatePresence>
+                {(isFullscreen || isImmersiveMode) && (showFloatingNav || showControls) && (
+                    <>
+                        {/* Left side - Prev Chapter */}
+                        {prevChapter && (
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-50"
+                            >
+                                <Link
+                                    href={`/komik/read/${encodeURIComponent(prevChapter)}`}
+                                    className="flex flex-col items-center gap-1 md:gap-2 p-2 md:p-4 rounded-lg md:rounded-xl glass border border-border/30 hover:bg-surface/90 active:bg-surface/90 transition-all group"
+                                >
+                                    <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 text-accent group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] md:text-xs font-medium text-text-secondary hidden sm:block">Prev</span>
+                                </Link>
+                            </motion.div>
+                        )}
+
+                        {/* Right side - Next Chapter */}
+                        {nextChapter && (
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                className="fixed right-2 md:right-4 top-1/2 -translate-y-1/2 z-50"
+                            >
+                                <Link
+                                    href={`/komik/read/${encodeURIComponent(nextChapter)}`}
+                                    className="flex flex-col items-center gap-1 md:gap-2 p-2 md:p-4 rounded-lg md:rounded-xl glass border border-border/30 hover:bg-surface/90 active:bg-surface/90 transition-all group"
+                                >
+                                    <ChevronRight className="w-6 h-6 md:w-8 md:h-8 text-accent group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] md:text-xs font-medium text-text-secondary hidden sm:block">Next</span>
+                                </Link>
+                            </motion.div>
+                        )}
+
+                        {/* Bottom center - Exit Fullscreen & Page Info */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className="fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 md:gap-3"
+                        >
+                            <div className="px-3 md:px-4 py-1.5 md:py-2 rounded-full glass border border-border/30">
+                                <span className="text-xs md:text-sm font-medium text-text-primary">
+                                    {currentImage + 1} / {images.length}
+                                </span>
+                            </div>
+                            <button
+                                onClick={toggleFullscreen}
+                                className="p-2 md:p-3 rounded-full glass border border-border/30 hover:bg-surface/90 active:bg-surface/90 transition-all"
+                                title="Keluar Fullscreen (F)"
+                            >
+                                <Minimize className="w-4 h-4 md:w-5 md:h-5 text-accent" />
+                            </button>
+                            <button
+                                onClick={scrollToTop}
+                                className="p-2 md:p-3 rounded-full bg-accent hover:bg-accent-hover active:bg-accent-hover transition-all"
+                            >
+                                <ArrowUp className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                            </button>
+                        </motion.div>
+                    </>
                 )}
             </AnimatePresence>
         </div>

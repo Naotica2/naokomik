@@ -46,6 +46,7 @@
 }
 
 @layer components {
+
   /* Loading Skeleton */
   .skeleton {
     @apply relative overflow-hidden bg-surface;
@@ -54,12 +55,10 @@
   .skeleton::after {
     content: "";
     @apply absolute inset-0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.04),
-      transparent
-    );
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.04),
+        transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite linear;
   }
@@ -135,12 +134,10 @@
 
   /* Gradient overlays */
   .gradient-overlay {
-    background: linear-gradient(
-      to top,
-      rgba(0, 0, 0, 0.9) 0%,
-      rgba(0, 0, 0, 0.5) 50%,
-      transparent 100%
-    );
+    background: linear-gradient(to top,
+        rgba(0, 0, 0, 0.9) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        transparent 100%);
   }
 
   /* Badge */
@@ -177,6 +174,68 @@
   .night-mode .reader-image {
     filter: brightness(0.8) sepia(0.1);
   }
+
+  /* Fullscreen reader mode */
+  .fullscreen-reader {
+    @apply overflow-auto;
+    background: #000;
+  }
+
+  .fullscreen-reader::-webkit-scrollbar {
+    @apply w-1 opacity-0;
+    transition: opacity 0.3s ease;
+  }
+
+  .fullscreen-reader:hover::-webkit-scrollbar {
+    @apply opacity-100;
+  }
+
+  .fullscreen-reader::-webkit-scrollbar-thumb {
+    @apply bg-accent/30 rounded-full;
+  }
+
+  .fullscreen-reader .reader-container {
+    @apply max-w-none px-0 py-0;
+  }
+
+  .fullscreen-reader .reader-image {
+    @apply max-w-full mx-auto;
+    width: 100%;
+    max-width: 1400px;
+  }
+
+  /* Hide cursor in fullscreen after inactivity */
+  .fullscreen-reader.cursor-hidden {
+    cursor: none;
+  }
+
+  /* Immersive mode for iOS/Safari (fallback when Fullscreen API not available) */
+  .immersive-mode {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile-specific adjustments */
+  @media (max-width: 640px) {
+
+    .fullscreen-reader .reader-container,
+    .immersive-mode .reader-container {
+      @apply py-0;
+    }
+
+    .fullscreen-reader .reader-image,
+    .immersive-mode .reader-image {
+      max-width: 100%;
+    }
+  }
 }
 
 @layer utilities {
@@ -201,13 +260,11 @@
 
   /* Fade edges for horizontal scroll */
   .fade-edges {
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      black 5%,
-      black 95%,
-      transparent
-    );
+    mask-image: linear-gradient(to right,
+        transparent,
+        black 5%,
+        black 95%,
+        transparent);
   }
 
   /* Line clamp utilities */
@@ -237,6 +294,7 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
