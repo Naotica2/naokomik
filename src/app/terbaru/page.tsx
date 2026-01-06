@@ -84,7 +84,7 @@ export default function TerbaruPage() {
                                 Update Terbaru
                             </h1>
                             <p className="text-text-muted mt-1">
-                                Manga dengan chapter terbaru yang baru diupdate
+                                Komik dengan chapter terbaru yang baru diupdate
                             </p>
                         </div>
                     </motion.div>

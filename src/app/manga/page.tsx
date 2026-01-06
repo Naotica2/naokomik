@@ -80,10 +80,10 @@ export default function LibraryPage() {
                         </div>
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
-                                Library Manga
+                                Library Komik
                             </h1>
                             <p className="text-text-muted mt-1">
-                                Jelajahi koleksi manga, manhwa, dan manhua
+                                Jelajahi koleksi komik, manhwa, dan manhua
                             </p>
                         </div>
                     </motion.div>
