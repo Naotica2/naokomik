@@ -290,9 +290,7 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                                     className="flex items-center gap-2 text-sm text-text-secondary hover:text-accent transition-colors"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
-                                    <span className="hidden sm:inline">
-                                        Chapter Sebelumnya
-                                    </span>
+                                    <span>Prev</span>
                                 </Link>
                             ) : (
                                 <div />
@@ -312,9 +310,7 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                                     href={`/komik/read/${encodeURIComponent(nextChapter)}`}
                                     className="flex items-center gap-2 text-sm text-text-secondary hover:text-accent transition-colors"
                                 >
-                                    <span className="hidden sm:inline">
-                                        Chapter Selanjutnya
-                                    </span>
+                                    <span>Next</span>
                                     <ChevronRight className="w-5 h-5" />
                                 </Link>
                             ) : (
