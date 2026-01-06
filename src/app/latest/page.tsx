@@ -84,7 +84,7 @@ export default function TerbaruPage() {
                                 Latest Updates
                             </h1>
                             <p className="text-text-muted mt-1">
-                                Comics with newly updated chapters
+                                Manga, Manhwa, Manhua update terbaru
                             </p>
                         </div>
                     </motion.div>
