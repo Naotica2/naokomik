@@ -81,10 +81,10 @@ export default function TerbaruPage() {
                         </div>
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
-                                Update Terbaru
+                                Latest Updates
                             </h1>
                             <p className="text-text-muted mt-1">
-                                Komik dengan chapter terbaru yang baru diupdate
+                                Comics with newly updated chapters
                             </p>
                         </div>
                     </motion.div>

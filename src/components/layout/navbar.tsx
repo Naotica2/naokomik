@@ -11,7 +11,7 @@ import { SearchBar } from "@/components/search/search-bar";
 
 const navLinks = [
     { href: "/", label: "Home", icon: Flame },
-    { href: "/terbaru", label: "Terbaru", icon: Clock },
+    { href: "/latest", label: "Latest", icon: Clock },
     { href: "/manga", label: "Library", icon: Library },
 ];
 
