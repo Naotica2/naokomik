@@ -27,10 +27,17 @@ export async function getLatestManga(
 ): Promise<PaginatedResponse<Manga>> {
     let crawlUrl: string;
 
-    if (page === 1) {
-        crawlUrl = `${KOMIKU_API_BASE}/other/${tag}/`;
+    // Use /update/ endpoint for latest updates, /other/hot/ for popular
+    if (tag === "update") {
+        // Latest updates endpoint
+        crawlUrl = page === 1
+            ? `${KOMIKU_BASE}/update/`
+            : `${KOMIKU_BASE}/update/page/${page}/`;
     } else {
-        crawlUrl = `${KOMIKU_API_BASE}/other/${tag}/page/${page}/`;
+        // Popular/hot endpoint
+        crawlUrl = page === 1
+            ? `${KOMIKU_API_BASE}/other/${tag}/`
+            : `${KOMIKU_API_BASE}/other/${tag}/page/${page}/`;
     }
 
     const response = await fetch(crawlUrl, {
