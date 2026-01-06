@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { History, BookOpen, X, Trash2, ChevronRight } from "lucide-react";
-import { getHistory, removeFromHistory, clearHistory, type HistoryItem } from "@/lib/history";
+import { History, BookOpen, X, ChevronRight } from "lucide-react";
+import { getHistory, removeFromHistory, type HistoryItem } from "@/lib/history";
 import { cn } from "@/lib/cn";
 
 export function ReadingHistory() {
@@ -24,11 +24,6 @@ export function ReadingHistory() {
         setHistory(getHistory());
     };
 
-    const handleClearAll = () => {
-        clearHistory();
-        setHistory([]);
-    };
-
     // Don't render until client-side loaded
     if (!isLoaded || history.length === 0) {
         return null;
@@ -43,19 +38,19 @@ export function ReadingHistory() {
                     </div>
                     <h2 className="section-title">Lanjutkan Membaca</h2>
                 </div>
-                <button
-                    onClick={handleClearAll}
-                    className="flex items-center gap-1.5 text-xs text-text-muted hover:text-red-400 transition-colors"
+                <Link
+                    href="/history"
+                    className="flex items-center gap-1.5 text-sm text-text-muted hover:text-accent transition-colors"
                 >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Hapus Semua</span>
-                </button>
+                    <span>Lihat Semua</span>
+                    <ChevronRight className="w-4 h-4" />
+                </Link>
             </div>
 
             <div className="relative">
                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
                     <AnimatePresence mode="popLayout">
-                        {history.slice(0, 10).map((item, index) => (
+                        {history.slice(0, 5).map((item, index) => (
                             <motion.div
                                 key={item.slug}
                                 initial={{ opacity: 0, scale: 0.9 }}

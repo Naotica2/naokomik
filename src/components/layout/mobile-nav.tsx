@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Home, Library, Search, Clock } from "lucide-react";
+import { Home, Library, History, Clock } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 const navItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/latest", label: "Latest", icon: Clock },
     { href: "/komik", label: "Library", icon: Library },
-    { href: "/search", label: "Search", icon: Search },
+    { href: "/history", label: "History", icon: History },
 ];
 
 export function MobileNav() {
