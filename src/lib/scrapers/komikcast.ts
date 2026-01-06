@@ -22,11 +22,16 @@ const DEFAULT_HEADERS = {
 
 /**
  * Fetch latest manga from Komikcast
+ * @param page - Page number
+ * @param tag - Sort tag: "hot" for popular, "update" for latest updates
  */
 export async function getLatestManga(
-    page: number = 1
+    page: number = 1,
+    tag: string = "hot"
 ): Promise<PaginatedResponse<Manga>> {
-    const crawlUrl = `${KOMIKCAST_BASE}/daftar-komik/page/${page}/?sortby=update`;
+    // Map tag to Komikcast sortby parameter
+    const sortby = tag === "update" ? "update" : "popular";
+    const crawlUrl = `${KOMIKCAST_BASE}/daftar-komik/page/${page}/?sortby=${sortby}`;
 
     const response = await fetch(crawlUrl, {
         headers: DEFAULT_HEADERS,
@@ -71,8 +76,8 @@ export async function getLatestManga(
 
     return {
         data: mangaList,
-        nextPage: mangaList.length > 0 ? `?page=${page + 1}` : null,
-        prevPage: page > 1 ? `?page=${page - 1}` : null,
+        nextPage: mangaList.length > 0 ? `?page=${page + 1}&tag=${tag}` : null,
+        prevPage: page > 1 ? `?page=${page - 1}&tag=${tag}` : null,
         currentPage: page,
     };
 }

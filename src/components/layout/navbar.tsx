@@ -5,12 +5,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Search, Library, Flame } from "lucide-react";
+import { Menu, X, Search, Library, Flame, Clock } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { SearchBar } from "@/components/search/search-bar";
 
 const navLinks = [
     { href: "/", label: "Home", icon: Flame },
+    { href: "/terbaru", label: "Terbaru", icon: Clock },
     { href: "/manga", label: "Library", icon: Library },
 ];
 

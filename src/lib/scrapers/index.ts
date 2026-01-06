@@ -87,7 +87,7 @@ export async function getLatestManga(
 ): Promise<FailoverResult<PaginatedResponse<Manga>>> {
     return withFailover(
         () => komiku.getLatestManga(page, tag),
-        () => komikcast.getLatestManga(page),
+        () => komikcast.getLatestManga(page, tag),
         validateMangaList
     );
 }
