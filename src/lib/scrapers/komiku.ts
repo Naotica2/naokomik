@@ -270,7 +270,7 @@ export async function getChapterImages(slug: string): Promise<ChapterContent> {
         "";
 
     // Get navigation chapters - try multiple selectors for prev/next
-    let prevChapterHref = $("a.prev").attr("href") ||
+    const prevChapterHref = $("a.prev").attr("href") ||
         $(".nxpr a:first-child").attr("href") ||
         $(".chapnav a:first-child").attr("href") ||
         $("a[rel='prev']").attr("href") ||
@@ -279,7 +279,7 @@ export async function getChapterImages(slug: string): Promise<ChapterContent> {
         $(".navi a:contains('Sebelumnya')").attr("href") ||
         "";
 
-    let nextChapterHref = $("a.next").attr("href") ||
+    const nextChapterHref = $("a.next").attr("href") ||
         $(".nxpr a:last-child").attr("href") ||
         $(".chapnav a:last-child").attr("href") ||
         $("a[rel='next']").attr("href") ||
