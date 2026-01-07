@@ -33,12 +33,16 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
     const [showFloatingNav, setShowFloatingNav] = useState(false);
     const [isImmersiveMode, setIsImmersiveMode] = useState(false);
     const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+    const [isInitialized, setIsInitialized] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
     const floatingNavTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Check if running on iOS (doesn't support Fullscreen API well)
     const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    // Constants for sessionStorage
+    const FULLSCREEN_PREF_KEY = 'naokomik_fullscreen_preference';
 
     // Detect device type based on viewport
     useEffect(() => {
@@ -112,44 +116,85 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
         return () => observer.disconnect();
     }, [images]);
 
-    // Fullscreen change detection
+    // Fullscreen change detection & persistence
     useEffect(() => {
         const handleFullscreenChange = () => {
-            setIsFullscreen(!!document.fullscreenElement);
+            const isNowFullscreen = !!document.fullscreenElement;
+            setIsFullscreen(isNowFullscreen);
+            // Persist preference
+            if (isNowFullscreen) {
+                sessionStorage.setItem(FULLSCREEN_PREF_KEY, 'true');
+            }
         };
 
         document.addEventListener("fullscreenchange", handleFullscreenChange);
         return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    }, []);
+    }, [FULLSCREEN_PREF_KEY]);
+
+    // Restore fullscreen preference on mount - always use immersive mode for auto-restore
+    // Native fullscreen API cannot be called without user gesture
+    useEffect(() => {
+        const savedPref = sessionStorage.getItem(FULLSCREEN_PREF_KEY);
+        if (savedPref === 'true' && !isInitialized) {
+            setIsInitialized(true);
+            // Always use immersive mode for auto-restore (no user gesture needed)
+            setIsImmersiveMode(true);
+            setIsFullscreen(true);
+        } else {
+            setIsInitialized(true);
+        }
+    }, [isInitialized, FULLSCREEN_PREF_KEY]);
 
     // Toggle fullscreen mode
     const toggleFullscreen = useCallback(async () => {
         try {
-            // For iOS or when Fullscreen API is not available, use immersive mode
-            if (isIOS || !document.documentElement.requestFullscreen) {
-                setIsImmersiveMode(prev => !prev);
-                setIsFullscreen(prev => !prev);
+            // If already in immersive mode, toggle it off
+            if (isImmersiveMode) {
+                setIsImmersiveMode(false);
+                setIsFullscreen(false);
+                sessionStorage.removeItem(FULLSCREEN_PREF_KEY);
                 return;
             }
 
+            // For iOS or when Fullscreen API is not available, use immersive mode
+            if (isIOS || !document.documentElement.requestFullscreen) {
+                setIsImmersiveMode(true);
+                setIsFullscreen(true);
+                sessionStorage.setItem(FULLSCREEN_PREF_KEY, 'true');
+                return;
+            }
+
+            // Native fullscreen toggle
             if (!document.fullscreenElement) {
                 await document.documentElement.requestFullscreen();
                 setIsFullscreen(true);
+                sessionStorage.setItem(FULLSCREEN_PREF_KEY, 'true');
             } else {
                 await document.exitFullscreen();
                 setIsFullscreen(false);
+                setIsImmersiveMode(false);
+                sessionStorage.removeItem(FULLSCREEN_PREF_KEY);
             }
         } catch (err) {
             // Fallback to immersive mode if fullscreen fails
             console.error("Fullscreen error, using immersive mode:", err);
-            setIsImmersiveMode(prev => !prev);
-            setIsFullscreen(prev => !prev);
+            const newState = !isImmersiveMode;
+            setIsImmersiveMode(newState);
+            setIsFullscreen(newState);
+            if (newState) {
+                sessionStorage.setItem(FULLSCREEN_PREF_KEY, 'true');
+            } else {
+                sessionStorage.removeItem(FULLSCREEN_PREF_KEY);
+            }
         }
-    }, [isIOS]);
+    }, [isIOS, isImmersiveMode, FULLSCREEN_PREF_KEY]);
 
     // Exit fullscreen
     const exitFullscreen = useCallback(async () => {
         try {
+            // Always clear preference when exiting
+            sessionStorage.removeItem(FULLSCREEN_PREF_KEY);
+
             if (isImmersiveMode) {
                 setIsImmersiveMode(false);
                 setIsFullscreen(false);
@@ -164,7 +209,7 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
             setIsImmersiveMode(false);
             setIsFullscreen(false);
         }
-    }, [isImmersiveMode]);
+    }, [isImmersiveMode, FULLSCREEN_PREF_KEY]);
 
     // Keyboard navigation
     useEffect(() => {

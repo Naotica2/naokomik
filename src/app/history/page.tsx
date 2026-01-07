@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { History, BookOpen, X, Trash2, Clock, ArrowLeft } from "lucide-react";
+import { History, BookOpen, X, Trash2, Clock, ArrowLeft, User, ChevronRight } from "lucide-react";
 import { getHistory, removeFromHistory, clearHistory, type HistoryItem } from "@/lib/history";
 import { cn } from "@/lib/cn";
 
@@ -120,8 +120,7 @@ export default function HistoryPage() {
                                     transition={{ delay: index * 0.03 }}
                                     className="group relative"
                                 >
-                                    <Link
-                                        href={`/komik/read/${encodeURIComponent(item.chapterSlug)}`}
+                                    <div
                                         className={cn(
                                             "flex gap-4 p-4 rounded-xl",
                                             "bg-surface hover:bg-surface-hover",
@@ -142,19 +141,50 @@ export default function HistoryPage() {
 
                                         {/* Info */}
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-medium text-text-primary line-clamp-2 text-sm mb-1 group-hover:text-accent transition-colors">
+                                            <h3 className="font-medium text-text-primary line-clamp-2 text-sm mb-1">
                                                 {item.title}
                                             </h3>
                                             <div className="flex items-center gap-1.5 text-xs text-accent mb-2">
                                                 <BookOpen className="w-3.5 h-3.5" />
                                                 <span>{item.chapterNumber}</span>
                                             </div>
-                                            <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                                            <div className="flex items-center gap-1.5 text-xs text-text-muted mb-3">
                                                 <Clock className="w-3.5 h-3.5" />
                                                 <span>{formatTime(item.lastRead)}</span>
                                             </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex items-center gap-2">
+                                                <Link
+                                                    href={`/komik/read/${encodeURIComponent(item.chapterSlug)}`}
+                                                    className={cn(
+                                                        "flex items-center gap-1.5",
+                                                        "px-3 py-1.5 rounded-lg",
+                                                        "bg-accent hover:bg-accent-hover",
+                                                        "text-white text-xs font-medium",
+                                                        "transition-colors"
+                                                    )}
+                                                >
+                                                    <BookOpen className="w-3.5 h-3.5" />
+                                                    <span>Lanjut Baca</span>
+                                                    <ChevronRight className="w-3.5 h-3.5" />
+                                                </Link>
+                                                <Link
+                                                    href={`/komik/${encodeURIComponent(item.slug)}`}
+                                                    className={cn(
+                                                        "flex items-center gap-1.5",
+                                                        "px-3 py-1.5 rounded-lg",
+                                                        "bg-surface-hover hover:bg-border",
+                                                        "text-text-secondary text-xs font-medium",
+                                                        "transition-colors border border-border"
+                                                    )}
+                                                >
+                                                    <User className="w-3.5 h-3.5" />
+                                                    <span>Profil</span>
+                                                </Link>
+                                            </div>
                                         </div>
-                                    </Link>
+                                    </div>
 
                                     {/* Remove Button */}
                                     <button

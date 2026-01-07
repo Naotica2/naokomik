@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { History, BookOpen, X, ChevronRight } from "lucide-react";
+import { History, BookOpen, X, ChevronRight, User } from "lucide-react";
 import { getHistory, removeFromHistory, type HistoryItem } from "@/lib/history";
 import { cn } from "@/lib/cn";
 
@@ -59,12 +59,10 @@ export function ReadingHistory() {
                                 transition={{ delay: index * 0.05 }}
                                 className="flex-shrink-0"
                             >
-                                <Link
-                                    href={`/komik/read/${encodeURIComponent(item.chapterSlug)}`}
-                                    className={cn(
-                                        "block relative group",
-                                        "w-[140px] sm:w-[160px]"
-                                    )}
+                                <div className={cn(
+                                    "block relative group",
+                                    "w-[140px] sm:w-[160px]"
+                                )}
                                 >
                                     {/* Remove Button */}
                                     <button
@@ -108,19 +106,42 @@ export function ReadingHistory() {
                                         </div>
                                     </div>
 
-                                    {/* Hover Continue Button */}
+                                    {/* Hover Dual-Action Overlay */}
                                     <div className={cn(
-                                        "absolute inset-0 flex items-center justify-center",
-                                        "bg-black/60 rounded-lg",
+                                        "absolute inset-0 flex flex-col items-center justify-center gap-2",
+                                        "bg-black/70 rounded-lg",
                                         "opacity-0 group-hover:opacity-100",
-                                        "transition-opacity duration-200"
+                                        "transition-opacity duration-200",
+                                        "p-2"
                                     )}>
-                                        <div className="flex items-center gap-1.5 text-white text-sm font-medium">
-                                            <span>Lanjutkan</span>
-                                            <ChevronRight className="w-4 h-4" />
-                                        </div>
+                                        <Link
+                                            href={`/komik/read/${encodeURIComponent(item.chapterSlug)}`}
+                                            className={cn(
+                                                "flex items-center gap-1.5 w-full justify-center",
+                                                "px-3 py-2 rounded-lg",
+                                                "bg-accent hover:bg-accent-hover",
+                                                "text-white text-xs font-medium",
+                                                "transition-colors"
+                                            )}
+                                        >
+                                            <BookOpen className="w-3.5 h-3.5" />
+                                            <span>Lanjut Baca</span>
+                                        </Link>
+                                        <Link
+                                            href={`/komik/${encodeURIComponent(item.slug)}`}
+                                            className={cn(
+                                                "flex items-center gap-1.5 w-full justify-center",
+                                                "px-3 py-2 rounded-lg",
+                                                "bg-surface hover:bg-surface-hover",
+                                                "text-text-primary text-xs font-medium",
+                                                "transition-colors border border-border"
+                                            )}
+                                        >
+                                            <User className="w-3.5 h-3.5" />
+                                            <span>Lihat Profil</span>
+                                        </Link>
                                     </div>
-                                </Link>
+                                </div>
                             </motion.div>
                         ))}
                     </AnimatePresence>

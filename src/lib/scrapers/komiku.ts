@@ -269,9 +269,38 @@ export async function getChapterImages(slug: string): Promise<ChapterContent> {
         slug.match(/chapter-?([\d.]+)/i)?.[1] ||
         "";
 
-    // Get navigation chapters
-    const prevChapter = sanitizeText($("a.prev").attr("href")?.split("/")[1] || "");
-    const nextChapter = sanitizeText($("a.next").attr("href")?.split("/")[1] || "");
+    // Get navigation chapters - try multiple selectors for prev/next
+    let prevChapterHref = $("a.prev").attr("href") ||
+        $(".nxpr a:first-child").attr("href") ||
+        $(".chapnav a:first-child").attr("href") ||
+        $("a[rel='prev']").attr("href") ||
+        $(".prevnext a").first().attr("href") ||
+        $(".navi a:contains('Prev')").attr("href") ||
+        $(".navi a:contains('Sebelumnya')").attr("href") ||
+        "";
+
+    let nextChapterHref = $("a.next").attr("href") ||
+        $(".nxpr a:last-child").attr("href") ||
+        $(".chapnav a:last-child").attr("href") ||
+        $("a[rel='next']").attr("href") ||
+        $(".prevnext a").last().attr("href") ||
+        $(".navi a:contains('Next')").attr("href") ||
+        $(".navi a:contains('Selanjutnya')").attr("href") ||
+        "";
+
+    // Extract slug from href
+    const extractSlugFromHref = (href: string): string => {
+        if (!href) return "";
+        // Remove base URL if present
+        href = href.replace(/^https?:\/\/[^\/]+/, "");
+        // Split and get the chapter part
+        const parts = href.split("/").filter(Boolean);
+        // Usually the slug is the first meaningful part
+        return parts[0] || parts[1] || "";
+    };
+
+    const prevChapter = sanitizeText(extractSlugFromHref(prevChapterHref));
+    const nextChapter = sanitizeText(extractSlugFromHref(nextChapterHref));
 
     return {
         images,
