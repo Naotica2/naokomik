@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Library, ChevronLeft, ChevronRight } from "lucide-react";
 import { MangaGrid } from "@/components/manga/manga-grid";
+import { usePaginationState } from "@/hooks/use-pagination-state";
 import type { Manga } from "@/types/manga";
 
 interface MangaResponse {
@@ -18,7 +19,9 @@ export default function LibraryPage() {
     const [manga, setManga] = useState<Manga[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
+    // Menggunakan usePaginationState untuk menyimpan halaman di sessionStorage
+    // isHydrated menunjukkan apakah state sudah terbaca dari sessionStorage
+    const [currentPage, setCurrentPage, isHydrated] = usePaginationState("komik-page", 1);
     const [hasNextPage, setHasNextPage] = useState(false);
 
     const fetchManga = useCallback(async (page: number) => {
@@ -47,9 +50,12 @@ export default function LibraryPage() {
         }
     }, []);
 
+    // Hanya fetch setelah state sudah terbaca dari sessionStorage (hydrated)
     useEffect(() => {
-        fetchManga(currentPage);
-    }, [currentPage, fetchManga]);
+        if (isHydrated) {
+            fetchManga(currentPage);
+        }
+    }, [currentPage, fetchManga, isHydrated]);
 
     const handlePrevPage = () => {
         if (currentPage > 1) {
