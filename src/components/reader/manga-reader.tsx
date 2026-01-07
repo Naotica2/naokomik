@@ -14,7 +14,6 @@ import {
     Loader2,
     Maximize,
     Minimize,
-    Menu,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { addToHistory } from "@/lib/history";
@@ -113,24 +112,6 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
         return () => observer.disconnect();
     }, [images]);
 
-    // Keyboard navigation
-    useEffect(() => {
-        const handleKeydown = (e: KeyboardEvent) => {
-            if (e.key === "ArrowLeft" && prevChapter) {
-                window.location.href = `/komik/read/${encodeURIComponent(prevChapter)}`;
-            } else if (e.key === "ArrowRight" && nextChapter) {
-                window.location.href = `/komik/read/${encodeURIComponent(nextChapter)}`;
-            } else if (e.key === "f" || e.key === "F") {
-                toggleFullscreen();
-            } else if (e.key === "Escape" && isFullscreen) {
-                exitFullscreen();
-            }
-        };
-
-        window.addEventListener("keydown", handleKeydown);
-        return () => window.removeEventListener("keydown", handleKeydown);
-    }, [prevChapter, nextChapter, isFullscreen]);
-
     // Fullscreen change detection
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -184,6 +165,24 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
             setIsFullscreen(false);
         }
     }, [isImmersiveMode]);
+
+    // Keyboard navigation
+    useEffect(() => {
+        const handleKeydown = (e: KeyboardEvent) => {
+            if (e.key === "ArrowLeft" && prevChapter) {
+                window.location.href = `/komik/read/${encodeURIComponent(prevChapter)}`;
+            } else if (e.key === "ArrowRight" && nextChapter) {
+                window.location.href = `/komik/read/${encodeURIComponent(nextChapter)}`;
+            } else if (e.key === "f" || e.key === "F") {
+                toggleFullscreen();
+            } else if (e.key === "Escape" && isFullscreen) {
+                exitFullscreen();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeydown);
+        return () => window.removeEventListener("keydown", handleKeydown);
+    }, [prevChapter, nextChapter, isFullscreen, exitFullscreen, toggleFullscreen]);
 
     // Show floating nav on mouse move in fullscreen
     const handleFullscreenMouseMove = useCallback(() => {

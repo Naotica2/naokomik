@@ -18,23 +18,17 @@ const DEFAULT_HEADERS = {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 };
 
-/**
- * Fetch latest/popular manga from Komiku
- */
 export async function getLatestManga(
     page: number = 1,
     tag: string = "hot"
 ): Promise<PaginatedResponse<Manga>> {
     let crawlUrl: string;
 
-    // Use /update/ endpoint for latest updates, /other/hot/ for popular
     if (tag === "update") {
-        // Latest updates endpoint
         crawlUrl = page === 1
             ? `${KOMIKU_BASE}/update/`
             : `${KOMIKU_BASE}/update/page/${page}/`;
     } else {
-        // Popular/hot endpoint
         crawlUrl = page === 1
             ? `${KOMIKU_API_BASE}/other/${tag}/`
             : `${KOMIKU_API_BASE}/other/${tag}/page/${page}/`;
@@ -42,7 +36,7 @@ export async function getLatestManga(
 
     const response = await fetch(crawlUrl, {
         headers: DEFAULT_HEADERS,
-        next: { revalidate: 300 }, // Cache for 5 minutes
+        next: { revalidate: 300 },
     });
 
     if (!response.ok) {
