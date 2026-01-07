@@ -272,8 +272,26 @@ export async function getChapterImages(slug: string): Promise<ChapterContent> {
     // Get navigation chapters
     const prevLink = $(".prev_pic a, .ch-prev-btn").attr("href") || "";
     const nextLink = $(".next_pic a, .ch-next-btn").attr("href") || "";
-    const prevChapter = prevLink.split("/").filter(Boolean).pop() || "";
-    const nextChapter = nextLink.split("/").filter(Boolean).pop() || "";
+    const prevChapterRaw = prevLink.split("/").filter(Boolean).pop() || "";
+    const nextChapterRaw = nextLink.split("/").filter(Boolean).pop() || "";
+
+    // Validate that a slug is actually a chapter slug, not a manga or other page
+    const isValidChapterSlug = (chapterSlug: string): boolean => {
+        if (!chapterSlug) return false;
+        const lowerSlug = chapterSlug.toLowerCase();
+        // Chapter slugs should contain 'ch' or 'chapter' or end with chapter number pattern
+        const isChapter = lowerSlug.includes('ch') ||
+            /chapter|\d+$/.test(lowerSlug) ||
+            /-(\d+)(-|$)/.test(lowerSlug);
+        // Exclude manga pages or other non-chapter pages
+        const isNotMangaPage = !lowerSlug.startsWith('manga') &&
+            lowerSlug !== 'manga' &&
+            !lowerSlug.includes('/manga/');
+        return isChapter && isNotMangaPage;
+    };
+
+    const prevChapter = isValidChapterSlug(prevChapterRaw) ? prevChapterRaw : "";
+    const nextChapter = isValidChapterSlug(nextChapterRaw) ? nextChapterRaw : "";
 
     return {
         images,
