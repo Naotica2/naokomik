@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { addToHistory } from "@/lib/history";
+import { addReadChapter } from "@/lib/read-chapters";
 import type { ChapterContent } from "@/types/manga";
 
 interface MangaReaderProps {
@@ -253,7 +254,7 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
         };
     }, []);
 
-    // Save to reading history when chapter loads
+    // Save to reading history and mark chapter as read
     useEffect(() => {
         if (mangaSlug && mangaTitle && chapterSlug && chapterNumber) {
             addToHistory({
@@ -263,6 +264,8 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                 chapterSlug: chapterSlug,
                 chapterNumber: chapterNumber,
             });
+            // Mark this chapter as read
+            addReadChapter(chapterSlug);
         }
     }, [mangaSlug, mangaTitle, mangaThumbnail, chapterSlug, chapterNumber]);
 
