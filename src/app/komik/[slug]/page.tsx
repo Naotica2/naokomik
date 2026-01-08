@@ -17,6 +17,7 @@ import {
     Play
 } from "lucide-react";
 import { ChapterList } from "@/components/manga/chapter-list";
+import { FavoriteButton } from "@/components/manga/favorite-button";
 import type { MangaDetail } from "@/types/manga";
 
 export default function MangaDetailPage() {
@@ -205,7 +206,7 @@ export default function MangaDetailPage() {
                         )}
 
                         {/* Action Buttons */}
-                        <div className="flex flex-wrap gap-3 pt-2">
+                        <div className="flex flex-wrap items-center gap-3 pt-2">
                             {firstChapter && (
                                 <Link
                                     href={`/komik/read/${encodeURIComponent(firstChapter.slug)}`}
@@ -224,6 +225,12 @@ export default function MangaDetailPage() {
                                     Chapter Terbaru
                                 </Link>
                             )}
+                            <FavoriteButton
+                                comicSlug={slug}
+                                comicTitle={manga.title}
+                                comicCover={manga.thumbnail}
+                                size="lg"
+                            />
                         </div>
                     </motion.div>
                 </div>
@@ -282,7 +289,7 @@ export default function MangaDetailPage() {
                     <div className="section-header">
                         <h2 className="section-title flex items-center gap-2">
                             <BookOpen className="w-5 h-5 text-accent" />
-                            Daftar Chapter
+                            Chapter List
                         </h2>
                         <span className="text-sm text-text-muted">
                             {manga.chapters?.length || 0} Chapter

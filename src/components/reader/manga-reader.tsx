@@ -14,6 +14,7 @@ import {
     Loader2,
     Maximize,
     Minimize,
+    Star,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { addToHistory } from "@/lib/history";
@@ -35,6 +36,7 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
     const [isImmersiveMode, setIsImmersiveMode] = useState(false);
     const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
     const [isInitialized, setIsInitialized] = useState(false);
+    const [showPointNotification, setShowPointNotification] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
     const floatingNavTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -268,6 +270,39 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
             addReadChapter(chapterSlug);
         }
     }, [mangaSlug, mangaTitle, mangaThumbnail, chapterSlug, chapterNumber]);
+
+    // Track chapter read for logged-in users (earn points)
+    useEffect(() => {
+        const trackChapterRead = async () => {
+            const token = localStorage.getItem("naokomik_session");
+            if (!token || !chapterSlug) return;
+
+            try {
+                const res = await fetch("/api/user/track-read", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        token,
+                        chapterSlug,
+                        comicSlug: mangaSlug,
+                        comicTitle: mangaTitle,
+                        comicCover: mangaThumbnail,
+                        chapterTitle: chapterNumber,
+                    }),
+                });
+                const data = await res.json();
+                if (data.pointsAdded > 0) {
+                    setShowPointNotification(true);
+                    // Auto-hide after 3 seconds
+                    setTimeout(() => setShowPointNotification(false), 3000);
+                }
+            } catch (err) {
+                console.error("Track read error:", err);
+            }
+        };
+
+        trackChapterRead();
+    }, [chapterSlug, mangaSlug, mangaTitle, mangaThumbnail, chapterNumber]);
 
     const scrollToTop = useCallback(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -629,6 +664,22 @@ export function MangaReader({ chapterData, chapterSlug }: MangaReaderProps) {
                             </motion.div>
                         )}
                     </>
+                )}
+            </AnimatePresence>
+
+            {/* Point Notification Toast */}
+            <AnimatePresence>
+                {showPointNotification && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                        className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30 flex items-center gap-2"
+                    >
+                        <Star className="w-5 h-5 fill-white" />
+                        <span className="font-semibold">+1 Point</span>
+                        <span className="text-white/80 text-sm">Chapter read!</span>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </div>

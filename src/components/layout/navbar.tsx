@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Search, Library, Flame, Clock, History } from "lucide-react";
+import { Menu, X, Search, Library, Flame, Clock, History, User, LogOut, LogIn, Shield } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { SearchBar } from "@/components/search/search-bar";
+import { useAuth } from "@/context/auth-context";
+import { DynamicRankBadge } from "@/components/user/rank-badge";
 
 const navLinks = [
     { href: "/", label: "Home", icon: Flame },
@@ -18,9 +20,12 @@ const navLinks = [
 
 export function Navbar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const { user, isLoading, isAdmin, signOut } = useAuth();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
     // Handle scroll
     useEffect(() => {
@@ -36,7 +41,14 @@ export function Navbar() {
     useEffect(() => {
         setIsMobileMenuOpen(false);
         setIsSearchOpen(false);
+        setIsUserMenuOpen(false);
     }, [pathname]);
+
+    const handleLogout = async () => {
+        await signOut();
+        setIsUserMenuOpen(false);
+        router.push("/");
+    };
 
     return (
         <>
@@ -93,11 +105,95 @@ export function Navbar() {
                             })}
                         </div>
 
-                        {/* Search & Menu */}
+                        {/* Search & User & Menu */}
                         <div className="flex items-center gap-2">
                             {/* Desktop Search */}
                             <div className="hidden md:block w-64">
                                 <SearchBar />
+                            </div>
+
+                            {/* User Menu (Desktop) */}
+                            <div className="hidden md:block relative">
+                                {isLoading ? (
+                                    <div className="w-8 h-8 rounded-full bg-surface animate-pulse" />
+                                ) : user ? (
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                            className="flex items-center gap-2 p-1.5 rounded-full hover:bg-surface transition-colors"
+                                        >
+                                            {user.avatar_url ? (
+                                                <Image
+                                                    src={user.avatar_url}
+                                                    alt={user.username}
+                                                    width={32}
+                                                    height={32}
+                                                    className="w-8 h-8 rounded-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center">
+                                                    <User className="w-4 h-4 text-white" />
+                                                </div>
+                                            )}
+                                        </button>
+
+                                        <AnimatePresence>
+                                            {isUserMenuOpen && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    className="absolute right-0 top-full mt-2 w-64 glass rounded-xl border border-border/50 overflow-hidden"
+                                                >
+                                                    <div className="p-4 border-b border-border/50">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="font-medium">{user.username}</span>
+                                                            {user.user_levels && (
+                                                                <DynamicRankBadge level={user.user_levels} size="sm" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-text-secondary truncate">
+                                                            {user.bio || "No bio"}
+                                                        </p>
+                                                    </div>
+                                                    <div className="p-2">
+                                                        <Link
+                                                            href="/profile"
+                                                            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-surface transition-colors"
+                                                        >
+                                                            <User className="w-4 h-4" />
+                                                            Profile
+                                                        </Link>
+                                                        {isAdmin && (
+                                                            <Link
+                                                                href="/naokomikadminasli"
+                                                                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                                                            >
+                                                                <Shield className="w-4 h-4" />
+                                                                Admin Dashboard
+                                                            </Link>
+                                                        )}
+                                                        <button
+                                                            onClick={handleLogout}
+                                                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface transition-colors"
+                                                        >
+                                                            <LogOut className="w-4 h-4" />
+                                                            Logout
+                                                        </button>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        href="/register"
+                                        className="flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition-colors"
+                                    >
+                                        <LogIn className="w-4 h-4" />
+                                        Register
+                                    </Link>
+                                )}
                             </div>
 
                             {/* Mobile Search Toggle */}
@@ -172,6 +268,45 @@ export function Navbar() {
                                         </Link>
                                     );
                                 })}
+
+                                {/* Mobile Auth Links */}
+                                <div className="pt-2 border-t border-border/50 space-y-2">
+                                    {user ? (
+                                        <>
+                                            <Link
+                                                href="/profile"
+                                                className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-text-secondary hover:text-text-primary hover:bg-surface-hover"
+                                            >
+                                                <User className="w-5 h-5" />
+                                                Profile
+                                            </Link>
+                                            {isAdmin && (
+                                                <Link
+                                                    href="/naokomikadminasli"
+                                                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-400 hover:bg-red-500/10"
+                                                >
+                                                    <Shield className="w-5 h-5" />
+                                                    Admin
+                                                </Link>
+                                            )}
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-text-secondary hover:text-text-primary hover:bg-surface-hover"
+                                            >
+                                                <LogOut className="w-5 h-5" />
+                                                Logout
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <Link
+                                            href="/register"
+                                            className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-accent hover:bg-accent-subtle"
+                                        >
+                                            <LogIn className="w-5 h-5" />
+                                            Register
+                                        </Link>
+                                    )}
+                                </div>
                             </div>
                         </motion.div>
                     )}
