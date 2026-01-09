@@ -44,7 +44,7 @@ export default function ProfilePage() {
                 .select("*")
                 .eq("user_id", user.id)
                 .order("added_at", { ascending: false })
-                .limit(6);
+                .limit(4);
 
             if (favoritesData) setFavorites(favoritesData);
 
@@ -54,7 +54,7 @@ export default function ProfilePage() {
                 .select("*")
                 .eq("user_id", user.id)
                 .order("read_at", { ascending: false })
-                .limit(6);
+                .limit(4);
 
             if (historyData) setHistory(historyData);
 
@@ -168,37 +168,37 @@ export default function ProfilePage() {
                 </div>
             </motion.div>
 
-            {/* Favorites Section */}
+            {/* Favorites Section - Letterboxd Style */}
             <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
             >
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold flex items-center gap-2">
-                        <Heart className="w-5 h-5 text-red-500" />
-                        Favorite Comics
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+                        Favorites
                     </h2>
                 </div>
 
                 {loadingData ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                        {[...Array(6)].map((_, i) => (
+                    <div className="grid grid-cols-4 gap-2">
+                        {[...Array(4)].map((_, i) => (
                             <div
                                 key={i}
-                                className="aspect-[2/3] rounded-lg bg-surface animate-pulse"
+                                className="aspect-[2/3] rounded-md bg-surface animate-pulse"
                             />
                         ))}
                     </div>
                 ) : favorites.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-4 gap-2">
                         {favorites.map((fav) => (
                             <Link
                                 key={fav.id}
                                 href={`/komik/${fav.comic_slug}`}
-                                className="group"
+                                className="group relative"
+                                title={fav.comic_title}
                             >
-                                <div className="aspect-[2/3] rounded-lg overflow-hidden bg-surface relative">
+                                <div className="aspect-[2/3] rounded-md overflow-hidden bg-surface relative border border-white/5 group-hover:border-accent/50 transition-all duration-200">
                                     {fav.comic_cover ? (
                                         <Image
                                             src={fav.comic_cover}
@@ -208,85 +208,98 @@ export default function ProfilePage() {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            <BookOpen className="w-8 h-8 text-text-secondary" />
+                                            <BookOpen className="w-6 h-6 text-text-secondary" />
                                         </div>
                                     )}
+                                    {/* Hover overlay with title */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end p-2">
+                                        <span className="text-xs font-medium line-clamp-2 text-white">
+                                            {fav.comic_title}
+                                        </span>
+                                    </div>
                                 </div>
-                                <h3 className="mt-2 text-sm font-medium line-clamp-2">
-                                    {fav.comic_title}
-                                </h3>
                             </Link>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-12 text-text-secondary">
-                        <Heart className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p>No favorites yet. Start adding comics you love!</p>
+                    <div className="text-center py-8 text-text-secondary">
+                        <Heart className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No favorites yet</p>
                     </div>
                 )}
             </motion.section>
 
-            {/* Reading History Section */}
+            {/* Recent Activity Section - Letterboxd Style */}
             <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
             >
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-accent" />
-                        Recently Read
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+                        Recent Activity
                     </h2>
+                    {history.length > 0 && (
+                        <Link
+                            href="/history"
+                            className="text-xs text-text-secondary hover:text-accent transition-colors"
+                        >
+                            More activity
+                        </Link>
+                    )}
                 </div>
 
                 {loadingData ? (
-                    <div className="space-y-3">
-                        {[...Array(3)].map((_, i) => (
+                    <div className="grid grid-cols-4 gap-2">
+                        {[...Array(4)].map((_, i) => (
                             <div
                                 key={i}
-                                className="h-20 rounded-lg bg-surface animate-pulse"
+                                className="aspect-[2/3] rounded-md bg-surface animate-pulse"
                             />
                         ))}
                     </div>
                 ) : history.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-4 gap-2">
                         {history.map((item) => (
                             <Link
                                 key={item.id}
                                 href={item.chapter_url || `/komik/${item.comic_slug}`}
-                                className="flex items-center gap-4 p-4 glass rounded-lg hover:bg-surface-hover transition-colors"
+                                className="group relative"
+                                title={item.comic_title}
                             >
-                                <div className="w-12 h-16 rounded overflow-hidden bg-surface flex-shrink-0">
+                                <div className="aspect-[2/3] rounded-md overflow-hidden bg-surface relative border border-white/5 group-hover:border-accent/50 transition-all duration-200">
                                     {item.comic_cover ? (
                                         <Image
                                             src={item.comic_cover}
                                             alt={item.comic_title}
-                                            width={48}
-                                            height={64}
-                                            className="w-full h-full object-cover"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            <BookOpen className="w-5 h-5 text-text-secondary" />
+                                            <BookOpen className="w-6 h-6 text-text-secondary" />
                                         </div>
                                     )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="font-medium truncate">{item.comic_title}</h3>
-                                    <p className="text-sm text-text-secondary">
-                                        {item.last_chapter || "View comic"}
-                                    </p>
-                                </div>
-                                <div className="text-xs text-text-secondary">
-                                    {new Date(item.read_at).toLocaleDateString("id-ID")}
+                                    {/* Bottom overlay with chapter info */}
+                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-2 pt-6">
+                                        <p className="text-[10px] text-white/80 truncate">
+                                            {item.last_chapter || "Reading"}
+                                        </p>
+                                    </div>
+                                    {/* Hover overlay with full title */}
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2">
+                                        <span className="text-xs font-medium text-center line-clamp-3 text-white">
+                                            {item.comic_title}
+                                        </span>
+                                    </div>
                                 </div>
                             </Link>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-12 text-text-secondary">
-                        <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p>No reading history yet. Start reading some comics!</p>
+                    <div className="text-center py-8 text-text-secondary">
+                        <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No reading history yet</p>
                     </div>
                 )}
             </motion.section>
