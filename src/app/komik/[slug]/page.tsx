@@ -239,12 +239,6 @@ export default function MangaDetailPage() {
                                     Chapter Terbaru
                                 </Link>
                             )}
-                            <FavoriteButton
-                                comicSlug={slug}
-                                comicTitle={manga.title}
-                                comicCover={manga.thumbnail}
-                                size="lg"
-                            />
                             <button
                                 onClick={handleCopyLink}
                                 className="btn-secondary"
@@ -257,6 +251,12 @@ export default function MangaDetailPage() {
                                 )}
                                 {copied ? "Tersalin!" : "Salin Link"}
                             </button>
+                            <FavoriteButton
+                                comicSlug={slug}
+                                comicTitle={manga.title}
+                                comicCover={manga.thumbnail}
+                                size="lg"
+                            />
                         </div>
                     </motion.div>
                 </div>

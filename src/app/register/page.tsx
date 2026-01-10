@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Lock, User, UserPlus, AlertCircle, Info } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
@@ -150,6 +151,18 @@ export default function RegisterPage() {
                                 </>
                             )}
                         </button>
+
+                        <div className="text-center pt-4 border-t border-border">
+                            <p className="text-text-secondary text-sm">
+                                Sudah punya akun?{" "}
+                                <Link
+                                    href="/login"
+                                    className="text-accent hover:text-accent-hover font-medium transition-colors"
+                                >
+                                    Login
+                                </Link>
+                            </p>
+                        </div>
                     </form>
                 </div>
             </motion.div>
