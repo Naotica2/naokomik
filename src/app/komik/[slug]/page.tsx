@@ -14,7 +14,9 @@ import {
     Tag,
     Loader2,
     AlertCircle,
-    Play
+    Play,
+    Link2,
+    Check
 } from "lucide-react";
 import { ChapterList } from "@/components/manga/chapter-list";
 import { FavoriteButton } from "@/components/manga/favorite-button";
@@ -26,6 +28,18 @@ export default function MangaDetailPage() {
     const [manga, setManga] = useState<MangaDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
+
+    const handleCopyLink = async () => {
+        try {
+            const url = window.location.href;
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Failed to copy link:", err);
+        }
+    };
 
     useEffect(() => {
         async function fetchMangaDetail() {
@@ -231,6 +245,18 @@ export default function MangaDetailPage() {
                                 comicCover={manga.thumbnail}
                                 size="lg"
                             />
+                            <button
+                                onClick={handleCopyLink}
+                                className="btn-secondary"
+                                title="Salin Link"
+                            >
+                                {copied ? (
+                                    <Check className="w-4 h-4 text-green-500" />
+                                ) : (
+                                    <Link2 className="w-4 h-4" />
+                                )}
+                                {copied ? "Tersalin!" : "Salin Link"}
+                            </button>
                         </div>
                     </motion.div>
                 </div>

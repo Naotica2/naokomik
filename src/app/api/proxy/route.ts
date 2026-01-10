@@ -5,7 +5,23 @@ const ALLOWED_DOMAINS = [
     "cdn.komiku.co.id",
     "img.komiku.id",
     "api.komiku.org",
-    "komikcast",
+    // Komikcast domains
+    "komikcast.bz",
+    "komikcast.io",
+    "komikcast.me",
+    "komikcast.lol",
+    "komikcast.cz",
+    "komikcast01.com",
+    "komikcast02.com",
+    "komikcast03.com",
+    "komikcast04.com",
+    "komikcast05.com",
+    "svr1.imgkc1.xyz",
+    "svr2.imgkc1.xyz",
+    "svr3.imgkc1.xyz",
+    "svr1.imgkc2.xyz",
+    "cdn.komikcast.cz",
+    // WordPress CDN (often used by Komikcast)
     "i0.wp.com",
     "i1.wp.com",
     "i2.wp.com",
@@ -15,10 +31,22 @@ const ALLOWED_DOMAINS = [
 function isAllowedDomain(url: string): boolean {
     try {
         const parsed = new URL(url);
-        return ALLOWED_DOMAINS.some(
+        const hostname = parsed.hostname;
+
+        // Check exact match or subdomain match
+        const exactMatch = ALLOWED_DOMAINS.some(
             (domain) =>
-                parsed.hostname === domain || parsed.hostname.endsWith(`.${domain}`)
+                hostname === domain || hostname.endsWith(`.${domain}`)
         );
+
+        if (exactMatch) return true;
+
+        // Additional patterns for Komikcast CDN domains (they change frequently)
+        if (hostname.includes("komikcast") || hostname.includes("imgkc")) {
+            return true;
+        }
+
+        return false;
     } catch {
         return false;
     }
