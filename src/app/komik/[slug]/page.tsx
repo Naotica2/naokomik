@@ -242,14 +242,14 @@ export default function MangaDetailPage() {
                             <button
                                 onClick={handleCopyLink}
                                 className="btn-secondary"
-                                title="Salin Link"
+                                title="Share"
                             >
                                 {copied ? (
                                     <Check className="w-4 h-4 text-green-500" />
                                 ) : (
                                     <Link2 className="w-4 h-4" />
                                 )}
-                                {copied ? "Tersalin!" : "Salin Link"}
+                                {copied ? "Tersalin!" : "Share"}
                             </button>
                             <FavoriteButton
                                 comicSlug={slug}
